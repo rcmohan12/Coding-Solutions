@@ -4,6 +4,7 @@ public class AnagramMaxValuesToChange {
 
 	public static void main(String[] args) {
 		System.out.println(lettersToRemove("173321"));
+		//TEster
 	}
 	
 	static int lettersToRemove(String s) {
