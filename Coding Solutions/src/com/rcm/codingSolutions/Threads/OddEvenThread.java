@@ -1,10 +1,15 @@
 package com.rcm.codingSolutions.Threads;
 
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 public class OddEvenThread {
 
 	public static void main(String[] args) { 
 		
-		NumberPrinter num = new NumberPrinter(10);
+//		NumberPrinter num = new NumberPrinter(10);
+		NumberPrint num = new NumberPrint(10);
 		
 		Thread t1 = new Thread(()-> num.printOdd());
 		Thread t2 = new Thread(()-> num.printEven());
@@ -19,6 +24,63 @@ public class OddEvenThread {
 		
 	}
 	
+}
+
+class NumberPrint {
+private int maxCount;
+	
+	private int counter = 1;
+	
+	private Lock lock = new ReentrantLock();
+	private Condition c1 = lock.newCondition();
+	private Condition c2 = lock.newCondition();
+	
+	public NumberPrint(int maxCount) {
+		this.maxCount = maxCount;
+	}
+	
+	public void printOdd() {
+		lock.lock();
+
+		try {
+			while(counter < maxCount) {
+				if(counter%2 == 0) {
+					try {
+						c1.await();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				System.out.println(Thread.currentThread().getName() + " : " +counter + " "); 
+				counter++;
+				c2.signal();
+			}
+		} finally  {
+			lock.unlock();
+		}
+		
+	}
+	
+	public void printEven() {
+		lock.lock();
+
+		try {
+			while(counter < maxCount) {
+				if(counter%2 == 1) {
+					try {
+						c2.await();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				System.out.println(Thread.currentThread().getName() + " : " +counter + " "); 
+				counter++;
+				c1.signal();
+			}
+		} finally  {
+			lock.unlock();
+		}
+	}
 }
 
 
